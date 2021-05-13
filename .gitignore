@@ -36,3 +36,4 @@ DiscordPlusPlus/.vs/DiscordPlusPlus/v16/Browse.VC.db
 DiscordPlusPlus/.vs/DiscordPlusPlus/v16/Browse.VC.db-shm
 DiscordPlusPlus/.vs/DiscordPlusPlus/v16/Browse.VC.db-wal
 DiscordPlusPlus/.vs/DiscordPlusPlus/v16/Browse.VC.opendb
+*.ipch
