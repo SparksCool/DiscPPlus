@@ -427,3 +427,7 @@ DiscordPlusPlus/.vs/DiscPPlus/v16/Browse.VC.db-shm
 DiscordPlusPlus/.vs/DiscPPlus/v16/Browse.VC.db
 *.db
 *.db-shm
+*.db-shm
+*.db
+DiscordPlusPlus/.vs/DiscPPlus/v16/Browse.VC.db
+DiscordPlusPlus/.vs/DiscPPlus/v16/Browse.VC.db-shm

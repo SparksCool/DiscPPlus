@@ -1,87 +1,102 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
-#include <boost/beast/core.hpp>
-#include <boost/beast/websocket.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <cstdlib>
 #include "httplib.h"
+#include "json.hpp"
 #include "Client.h"
 #include <iostream>
-#include <string>
+#include <websocketpp/config/asio_client.hpp>
+#include <websocketpp/client.hpp>
+#define active true
+
+namespace json = nlohmann;
+
+using websocketpp::lib::placeholders::_1;
+using websocketpp::lib::placeholders::_2;
+using websocketpp::lib::bind;
+
+typedef websocketpp::config::asio_tls_client::message_type::ptr message_ptr;
+typedef websocketpp::lib::shared_ptr<boost::asio::ssl::context> context_ptr;
+typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
+typedef client::connection_ptr connection_ptr;
 
 
-namespace beast = boost::beast;         // from <boost/beast.hpp>
-namespace http = beast::http;           // from <boost/beast/http.hpp>
-namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
-using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+
+// This message handler will be invoked once for each incoming message. It
+// prints the message and then sends a copy of the message back to the server.
+void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
+    std::cout << "on_message called with hdl: " << hdl.lock().get()
+        << " and message: " << msg->get_payload()
+        << std::endl;
+
+
+    websocketpp::lib::error_code ec;
+
+    c->send(hdl, msg->get_payload(), msg->get_opcode(), ec);
+    if (ec) {
+        std::cout << "Echo failed because: " << ec.message() << std::endl;
+    }
+}
 
 
 
-
-bool active = true;
 std::int64_t hbInterval = 4500;
 
 
 
 bool DiscPPlus::Client::establishConnection()
 {
-
-
     bool result{};
-    while (active) {
-        std::cout << "loop begin pinging in " << hbInterval << " milliseconds" << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(hbInterval));
+    client c;
+    c.set_tls_init_handler([this](websocketpp::connection_hdl) {
+        return websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv1);
+    });
+    std::string url = "wss://gateway.discord.gg/?v=8&encoding=json";
+    json::json const payload = {}; // data we are sending
+    try
+    {
+        // getting gateway
+        httplib::Client cli("https://discord.com");
 
-
-
-        try
-        {
-            httplib::Client cli("https://discord.com");
-
-            auto res = cli.Get("/api/v8/gateway");
-            if (res) {
-                std::cout << res->status << '\n';
-                std::cout << res->body << '\n';
-            }
-
-            auto const payload = ""; // data we are sending
-            std::string host = "gateway.discord.gg"; // host we are sending it to
-            auto const port = "443"; // port we are sending it on
-            net::io_context ioc; // needed for IO
-            tcp::resolver resolver(ioc); // resolver?
-            websocket::stream<tcp::socket> ws(ioc); // starting a stream i assume
-            auto const results = resolver.resolve(host, port); // gets results from resolver
-            auto ep = net::connect(ws.next_layer(), results);
-
-            host += ':' + std::to_string(ep.port());
-            ws.set_option(websocket::stream_base::decorator(
-                [](websocket::request_type& req)
-            {
-                req.set(http::field::user_agent,
-                    std::string(BOOST_BEAST_VERSION_STRING) +
-                    " websocket-client-coro");
-            }));
-
-            ws.handshake(host, "/?v=8&encoding=json/?v=4");
-            ws.write(net::buffer(std::string(payload)));
-            beast::flat_buffer buffer2;
-            ws.read(buffer2);
-            ws.close(websocket::close_code::normal);
-            std::cout << beast::make_printable(buffer2.data()) << std::endl;
-
-
-
-
-
-
+        auto res = cli.Get("/api/v8/gateway");
+        if (res) {
+            std::cout << res->status << '\n';
+            std::cout << res->body << '\n';
         }
-        catch (const std::exception& e)
-        {
-            std::cerr << "Connection failed, error: " << e.what() << '\n';
-            result = false;
+
+        // establishing a WSS connection so we can get opcode 10 and begin the heartbeat
+
+        c.set_access_channels(websocketpp::log::alevel::all);
+        c.clear_access_channels(websocketpp::log::alevel::frame_payload);
+
+        c.init_asio();
+
+        c.set_message_handler(bind(&on_message, &c, ::_1, ::_2));
+
+        websocketpp::lib::error_code ec;
+        client::connection_ptr con = c.get_connection(url, ec);
+        if (ec) {
+            std::cout << "could not create connection because: " << ec.message() << std::endl;
+            return 0;
         }
+
+        c.connect(con);
+        c.run();
+
+
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Connection failed, error: " << e.what() << '\n';
         result = false;
+    }
+    result = false;
+    
+
+
+
+
+    while (active) {
+        std::cout << "loop begin beginning in " << hbInterval << " milliseconds" << "\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(hbInterval));
         std::cout << "loop reset" << "\n";
     }
 
