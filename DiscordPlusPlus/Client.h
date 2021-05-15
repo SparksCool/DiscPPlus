@@ -1,6 +1,11 @@
 #pragma once
 
 
-namespace DiscordPPlus {
-
+namespace DiscPPlus 
+{
+	class Client
+	{
+	public: 
+		bool establishConnection();
+	};
 }

@@ -423,3 +423,7 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+DiscordPlusPlus/.vs/DiscPPlus/v16/Browse.VC.db-shm
+DiscordPlusPlus/.vs/DiscPPlus/v16/Browse.VC.db
+*.db
+*.db-shm
