@@ -1,5 +1,6 @@
 #pragma once
-
+#include <iostream>
+#include "json.hpp"
 
 namespace DiscPPlus 
 {
@@ -7,5 +8,6 @@ namespace DiscPPlus
 	{
 	public: 
 		bool establishConnection();
+		void sendWSReq(nlohmann::json payload, std::string wsUrl);
 	};
 }
