@@ -24,7 +24,6 @@ std::string url = "wss://gateway.discord.gg/?v=8&encoding=json";
 auto hbAck = json::json::parse(R"({"op": 1,"d": null})"); // heartbeat
 std::int64_t hbInterval = 41250;
 client c;
-
 // This message handler will be invoked once for each incoming message. It
 // prints the message and then sends a copy of the message back to the server.
 void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
@@ -35,20 +34,52 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
     int opcode = jsg["op"];
     switch (opcode) {
         case 10 :
-            hbInterval = jsg["d"]["heartbeat_interval"] - 250;
+            hbInterval = jsg["d"]["heartbeat_interval"] - 75;
             std::cout << "New Hearbeat Interval is: " << hbInterval << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(hbInterval));
+            c->send(hdl, hbAck.dump(), websocketpp::frame::opcode::text);
+            std::cout << "heartbeat sent" << "\n";
+            break;
+        case 11 :
+            std::this_thread::sleep_for(std::chrono::milliseconds(hbInterval));
+            c->send(hdl, hbAck.dump(), websocketpp::frame::opcode::text);
+            std::cout << "heartbeat sent" << "\n";
             break;
         default :
             break;
     }
-    websocketpp::lib::error_code ec;
 
-    c->send(hdl, msg->get_payload(), msg->get_opcode(), ec);
-    if (ec) {
-        std::cout << "Echo failed because: " << ec.message() << std::endl;
+    
+
+}
+void on_close(client* c, websocketpp::connection_hdl hdl) {
+    try {
+        // establishing a WSS connection so we can get opcode 10 and begin the heartbeat
+
+        websocketpp::lib::error_code ec;
+        client::connection_ptr con = c->get_connection(url, ec);
+        std::cout << "con altered" << '\n';
+
+
+
+        if (ec) {
+            std::cout << "could not create connection because: " << ec.message() << std::endl;
+            return;
+        }
+
+        std::cout << "Client is attempting connection" << '\n';
+        c->connect(con);
+        c->get_alog().write(websocketpp::log::alevel::app, "Connecting to " + url);
+        std::cout << "Client has connected and is attempting to run" << '\n';
+        c->run();
+        std::cout << "Client has connected and has ran" << '\n';
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Connection failed, error: " << e.what() << '\n';
+        return;
     }
 }
-
 
 
 
@@ -57,19 +88,24 @@ void DiscPPlus::Client::sendWSReq(json::json payload="", std::string wsUrl="") {
     try {
         // establishing a WSS connection so we can get opcode 10 and begin the heartbeat
 
+        
         websocketpp::lib::error_code ec;
         client::connection_ptr con = c.get_connection(wsUrl, ec);
-        if (payload != "") {
-            con->send(payload.dump(), websocketpp::frame::opcode::text);
-        }
+        std::cout << "con altered" << '\n';
+        
+
 
         if (ec) {
             std::cout << "could not create connection because: " << ec.message() << std::endl;
             return;
         }
+        if (payload != "") {
+            con->send(payload.dump(), websocketpp::frame::opcode::text);
+        }
 
         std::cout << "Client is attempting connection" << '\n';
         c.connect(con);
+        c.get_alog().write(websocketpp::log::alevel::app, "Connecting to " + wsUrl);
         std::cout << "Client has connected and is attempting to run" << '\n';
         c.run();
         std::cout << "Client has connected and has ran" << '\n';
@@ -83,6 +119,7 @@ void DiscPPlus::Client::sendWSReq(json::json payload="", std::string wsUrl="") {
 
 bool DiscPPlus::Client::establishConnection()
 {
+
     bool result{};
     c.init_asio();
     c.set_tls_init_handler([this](websocketpp::connection_hdl) {
@@ -90,10 +127,14 @@ bool DiscPPlus::Client::establishConnection()
     });
 
     c.set_access_channels(websocketpp::log::alevel::all);
+    c.set_error_channels(websocketpp::log::elevel::all);
+
+
     //c.clear_access_channels(websocketpp::log::alevel::frame_payload);
 
 
     c.set_message_handler(bind(&on_message, &c, ::_1, ::_2));
+
 
     try
     {
@@ -118,12 +159,7 @@ bool DiscPPlus::Client::establishConnection()
     
 
 
-    while (active) {
-        std::cout << "loop begin beginning in " << hbInterval << " milliseconds" << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(hbInterval));
-        sendWSReq(hbAck, url);
-        std::cout << "loop reset" << "\n";
-    }
+
 
 
     return result;
