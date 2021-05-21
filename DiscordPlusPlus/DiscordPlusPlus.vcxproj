@@ -141,17 +141,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Bot.cpp" />
-    <ClCompile Include="Client.cpp" />
-    <ClCompile Include="Commands.cpp" />
-    <ClCompile Include="DiscPPlus.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Client.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="client.h" />
     <ClInclude Include="httplib.h" />
     <ClInclude Include="json.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="classes.cpp" />
+    <ClCompile Include="client.cpp" />
+    <ClCompile Include="commands.cpp" />
+    <ClCompile Include="basic-bot-example.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

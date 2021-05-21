@@ -15,7 +15,7 @@ typedef client::connection_ptr connection_ptr;
 
 namespace DiscPPlus 
 {
-	class bot
+	class Bot
 	{
 	public:
 		client* c;
@@ -24,6 +24,25 @@ namespace DiscPPlus
 		std::string token;
 	public:
 		void SetStats(client* c, websocketpp::connection_hdl hdl, message_ptr msg, std::string token);
+	};
+	class Channel {
+	public:
+		void Send(std::string msg, DiscPPlus::Bot bot);
+		std::string id;
+	};
+	class Author {
+	public:
+		std::string name;
+		std::string mention;
+		std::string id;
+	};
+	class Message 
+	{
+	public:
+		std::string content;
+		bool embed;
+		Channel channel;
+		Author author;
 	};
 	class Client
 	{
@@ -34,9 +53,7 @@ namespace DiscPPlus
 	class Commands
 	{
 	public:
-		void OnMsg(std::string msg, std::string channel, DiscPPlus::bot bot);
-		void SendMsg(std::string msg, std::string channel, DiscPPlus::bot bot);
-
-
+		void OnMsg(Message msg, Bot bot);
+		void OnTyping(Author);
 	};
 }

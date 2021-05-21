@@ -1,7 +1,7 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 #include "json.hpp"
-#include "Client.h"
+#include "client.h"
 #include <iostream>
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
@@ -22,7 +22,7 @@ typedef client::connection_ptr connection_ptr;
 
 std::string Token = "";
 std::string url = "wss://gateway.discord.gg/?v=6&encoding=json";
-DiscPPlus::bot bot;
+DiscPPlus::Bot bot;
 auto hbAck = nlohmann::json::parse(R"({"op": 1,"d": null})"); // heartbeat
 auto ID = nlohmann::json::parse("{\"op\": 2,\"d\": {\"token\":\"\", \"properties\": { \"$os\": \"Windows\", \"$browser\": \"discpp\", \"$device\": \"discpp\"}, \"status\": \"dnd\"}}"); // identify packet
 std::int64_t hbInterval = 41250;
@@ -42,22 +42,18 @@ void sendHeartbeat(client* c, websocketpp::connection_hdl hdl, message_ptr msg) 
 
 
 void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
+    bot.SetStats(c, hdl, msg, Token);
+    auto jsg = nlohmann::json::parse(msg->get_payload()); // getting payload sent to us from discord
+    int opcode = jsg["op"]; // opcode recived from payload
+    DiscPPlus::Commands Command;
+    DiscPPlus::Message message;
+    if (jsg["s"] != NULL) {
+        hbAck["d"] = jsg["s"];
+    }
+
     std::cout << "on_message called with hdl: " << hdl.lock().get()
         << " and message: " << msg->get_payload()
         << std::endl;
-    bot.SetStats(c, hdl, msg, Token);
-    auto jsg = nlohmann::json::parse(msg->get_payload()); // getting payload sent to us from discord
-    int s;
-    try
-    {
-        s = jsg["s"];
-    }
-    catch (const std::exception&)
-    {
-        s = 1000;
-    }
-    int opcode = jsg["op"]; // opcode recived from payload
-    DiscPPlus::Commands Command;
     // a switch case statement to determine what response we should send back
     // depending on the opcode
     switch (opcode) {
@@ -73,7 +69,14 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
             break;
         case 0 : 
             if (jsg["t"] == "MESSAGE_CREATE") {
-                Command.OnMsg(jsg["d"]["content"], jsg["d"]["channel_id"], bot);
+                message.content = jsg["d"]["content"];
+                message.channel.id = jsg["d"]["channel_id"];
+                message.author.id = jsg["d"]["author"]["id"];
+                message.author.name = jsg["d"]["author"]["username"];
+                message.author.mention = "<@!" + message.author.id + ">";
+                message.embed = false; //jsg["d"][];
+
+                Command.OnMsg(message, bot);
             }
             break;
         default :
