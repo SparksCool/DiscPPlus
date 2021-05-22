@@ -24,7 +24,7 @@ std::string ftime(int sec) {
 		min = sec / 60;
 		sec -= min * 60;
 	}
-	if (hour > 60) {
+	if (min > 60) {
 		hour = min / 60;
 		min -= hour * 60;
 	}
@@ -50,5 +50,20 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 		auto end = std::chrono::steady_clock::now();
 		
 		msg.channel.Send("Elapsed Time in HH:MM:SS is: " + ftime(std::chrono::duration_cast<std::chrono::seconds>(end - start).count()), bot);
+	}
+	else if (msg.author.id == "844006016172687410") {
+		msg.channel.Send("Wow what a loon", bot);
+	}
+	else if (msg.content == "$embed") {
+		DiscPPlus::Embed embedmsg;
+		embedmsg.SetAuthor("SparksCool", "", "https://cdn.discordapp.com/attachments/740770560149291089/845730338239938590/detective.png");
+		embedmsg.SetTitle("Whats This?");
+		embedmsg.SetColor(16645526);
+		embedmsg.SetDesc("A Test Description???");
+		embedmsg.AddField("A Field?", "and a value too!");
+		embedmsg.AddField("A Second Field?", "and a second value too!");
+		embedmsg.AddField("A Third Field?", "and a third value too!");
+		embedmsg.SetFooter("Guess what we have a footer aswell!");
+		msg.channel.SendEmbed(embedmsg, bot);
 	}
 }

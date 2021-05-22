@@ -10,7 +10,6 @@
 #define active true
 
 
-
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
@@ -58,7 +57,7 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
     // depending on the opcode
     switch (opcode) {
         case 10 :
-            hbInterval = jsg["d"]["heartbeat_interval"] - 75;
+            hbInterval = jsg["d"]["heartbeat_interval"] - 50;
             std::cout << "New Hearbeat Interval is: " << hbInterval << std::endl;
             c->send(hdl, ID.dump(), websocketpp::frame::opcode::text);
             sh = std::thread(sendHeartbeat, c, hdl, msg);

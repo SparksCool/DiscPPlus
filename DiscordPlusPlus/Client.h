@@ -15,6 +15,17 @@ typedef client::connection_ptr connection_ptr;
 
 namespace DiscPPlus 
 {
+	class Embed 
+	{
+	public:
+		nlohmann::json payload;
+		void SetTitle(std::string title);
+		void AddField(std::string name, std::string value, bool inlin=false);
+		void SetColor(int color);
+		void SetDesc(std::string desc);
+		void SetAuthor(std::string name, std::string url = "", std::string icon_url = "", std::string proxy_icon_url = "");
+		void SetFooter(std::string text, std::string icon_url = "", std::string proxy_icon_url = "");
+	};
 	class Bot
 	{
 	public:
@@ -28,6 +39,7 @@ namespace DiscPPlus
 	class Channel {
 	public:
 		void Send(std::string msg, DiscPPlus::Bot bot);
+		void SendEmbed(DiscPPlus::Embed, DiscPPlus::Bot bot);
 		std::string id;
 	};
 	class Author {
@@ -54,6 +66,6 @@ namespace DiscPPlus
 	{
 	public:
 		void OnMsg(Message msg, Bot bot);
-		void OnTyping(Author);
+		void OnTyping(Author user, Channel channel);
 	};
 }

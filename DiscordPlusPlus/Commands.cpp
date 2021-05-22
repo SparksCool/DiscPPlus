@@ -8,6 +8,37 @@
 using DiscPPlus::Commands;
 using nlohmann::json;
 
+void DiscPPlus::Channel::SendEmbed(DiscPPlus::Embed embed, DiscPPlus::Bot bot) {
+    json payload = embed.payload;
+    std::string channel = id;
+    std::string path = std::string("/api/v6/channels/" + channel + "/messages");
+
+    //, payload.dump(), "application/json"
+//Authorization: Bot ${botToken}
+    httplib::Client cli("https://discord.com");
+
+    try
+    {
+        cli.set_default_headers({
+            {"Authorization", "Bot " + bot.token}
+            });
+        std::cout << channel << '\n';
+        auto res = cli.Post(path.c_str(), payload.dump(), "application/json");
+        if (res) {
+            std::cout << res->status << '\n';
+            std::cout << res->body << '\n';
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Connection failed, error: " << e.what() << '\n';
+        return;
+    }
+    catch (...) {
+        std::cerr << "UNKNOWN ERROR OCCURED";
+    }
+}
+
 void DiscPPlus::Channel::Send(std::string msg, DiscPPlus::Bot bot) {
     json payload;
     payload["content"] = msg;
