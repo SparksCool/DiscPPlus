@@ -1,13 +1,20 @@
 #include "client.h"
 #include <iostream>
 #include <chrono>
+#include <windows.h>
+#include <psapi.h>
+#include <stdio.h>
+
+
 using DiscPPlus::Commands; // basic commands listed in libs
 using DiscPPlus::Client; // main functions
 
 auto start = std::chrono::steady_clock::now();;
 
 int main() {
-	std::string token = ""; // our token
+
+
+	std::string const token = ""; // our token
 	start = std::chrono::steady_clock::now();
 	Client c;
 	c.establishConnection(token); // establish connection using token
@@ -39,6 +46,8 @@ std::string ftime(int sec) {
 }
 
 void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { // on message event teliing us that a message has been sent
+
+
 	// all this stuff here should be pretty obvious
 	if (msg.content == "$hi") {
 		msg.channel.Send("hello! "+ msg.author.mention + "! \n https://rb.gy/nnqou3", bot); 
@@ -65,5 +74,11 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 		embedmsg.AddField("A Third Field?", "and a third value too!");
 		embedmsg.SetFooter("Guess what we have a footer aswell!");
 		msg.channel.SendEmbed(embedmsg, bot);
+	}
+	else if (msg.content=="$ram") {
+		PROCESS_MEMORY_COUNTERS_EX pmc;
+		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+		float virtualMemUsedByMe = pmc.PrivateUsage;
+		msg.channel.Send("Current Memory Used is : " + std::to_string((virtualMemUsedByMe / (1024 * 1000))) + "MB", bot);
 	}
 }

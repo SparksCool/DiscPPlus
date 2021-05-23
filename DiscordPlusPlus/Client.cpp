@@ -22,8 +22,8 @@ typedef client::connection_ptr connection_ptr;
 std::string Token = "";
 std::string url = "wss://gateway.discord.gg/?v=6&encoding=json";
 DiscPPlus::Bot bot;
-auto hbAck = nlohmann::json::parse(R"({"op": 1,"d": null})"); // heartbeat
-auto ID = nlohmann::json::parse("{\"op\": 2,\"d\": {\"token\":\"\", \"properties\": { \"$os\": \"Windows\", \"$browser\": \"discpp\", \"$device\": \"discpp\"}, \"status\": \"dnd\"}}"); // identify packet
+nlohmann::json hbAck = nlohmann::json::parse(R"({"op": 1,"d": null})"); // heartbeat
+nlohmann::json ID = nlohmann::json::parse("{\"op\": 2,\"d\": {\"token\":\"\", \"properties\": { \"$os\": \"Windows\", \"$browser\": \"discpp\", \"$device\": \"discpp\"}, \"status\": \"dnd\"}}"); // identify packet
 std::int64_t hbInterval = 41250;
 client c;
 std::thread sh;
@@ -42,10 +42,11 @@ void sendHeartbeat(client* c, websocketpp::connection_hdl hdl, message_ptr msg) 
 
 void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
     bot.SetStats(c, hdl, msg, Token);
-    auto jsg = nlohmann::json::parse(msg->get_payload()); // getting payload sent to us from discord
+    nlohmann::json jsg = nlohmann::json::parse(msg->get_payload()); // getting payload sent to us from discord
     int opcode = jsg["op"]; // opcode recived from payload
     DiscPPlus::Commands Command;
     DiscPPlus::Message message;
+    DiscPPlus::Client clint;
     if (jsg["s"] != NULL) {
         hbAck["d"] = jsg["s"];
     }
@@ -65,6 +66,11 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
             break;
         case 11 :
             std::cout << "payload: " << hbAck.dump() << " was sent" << "\n";
+            break;
+        case 7 :
+            std::terminate();
+            
+            clint.establishConnection(Token);
             break;
         case 0 : 
             if (jsg["t"] == "MESSAGE_CREATE") {
