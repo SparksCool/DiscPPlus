@@ -8,5 +8,6 @@ Websocket++
 
 # Credits
 
-Nlohmann (json lib) \n
+Nlohmann (json lib)
+
 Yhirose (httplib)
