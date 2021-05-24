@@ -23,3 +23,4 @@ void DiscPPlus::Bot::SetStats(client* c, websocketpp::connection_hdl hdl, messag
 	DiscPPlus::Bot::msg = msg;
 	DiscPPlus::Bot::token = token;
 }
+

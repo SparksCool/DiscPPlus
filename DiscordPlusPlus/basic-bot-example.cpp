@@ -3,19 +3,17 @@
 #include <chrono>
 #include <windows.h>
 #include <psapi.h>
-#include <stdio.h>
 
 
 using DiscPPlus::Commands; // basic commands listed in libs
 using DiscPPlus::Client; // main functions
 
-auto start = std::chrono::steady_clock::now();;
+std::chrono::steady_clock::time_point const start = std::chrono::steady_clock::now();;
+DiscPPlus::Channel chan;
 
 int main() {
-
-
+	chan.id = "844006973732421634";
 	std::string const token = ""; // our token
-	start = std::chrono::steady_clock::now();
 	Client c;
 	c.establishConnection(token); // establish connection using token
 
@@ -23,8 +21,8 @@ int main() {
 	return 0; // exits the program
 }
 
-std::string ftime(int sec) {
-	int min = 00;
+std::string ftime(short int sec) {
+	short int min = 00;
 	int hour = 00;
 
 	if (sec > 60) {
@@ -35,9 +33,9 @@ std::string ftime(int sec) {
 		hour = min / 60;
 		min -= hour * 60;
 	}
-	std::string secs = (std::stringstream() << std::setw(2) << std::setfill('0') << sec).str();
-	std::string mins = (std::stringstream() << std::setw(2) << std::setfill('0') << min).str();
-	std::string hours = (std::stringstream() << std::setw(2) << std::setfill('0') << hour).str();
+	const std::string secs = (std::stringstream() << std::setw(2) << std::setfill('0') << sec).str();
+	const std::string mins = (std::stringstream() << std::setw(2) << std::setfill('0') << min).str();
+	const std::string hours = (std::stringstream() << std::setw(2) << std::setfill('0') << hour).str();
 
 
 	return hours + ":" + mins + ":" + secs;
@@ -56,12 +54,9 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 		msg.channel.Send("http://sparktonian.net/Secure/Filesharing/uploads/PrivateStorage/Capture.png", bot);
 	}
 	else if (msg.content == "$runtime") {
-		auto end = std::chrono::steady_clock::now();
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 		
 		msg.channel.Send("Elapsed Time in HH:MM:SS is: " + ftime(std::chrono::duration_cast<std::chrono::seconds>(end - start).count()), bot);
-	}
-	else if (msg.author.id == "844006016172687410") {
-		msg.channel.Send("Wow what a loon", bot);
 	}
 	else if (msg.content == "$embed") {
 		DiscPPlus::Embed embedmsg;
@@ -78,7 +73,15 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 	else if (msg.content=="$ram") {
 		PROCESS_MEMORY_COUNTERS_EX pmc;
 		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-		float virtualMemUsedByMe = pmc.PrivateUsage;
+		const float virtualMemUsedByMe = pmc.PrivateUsage;
 		msg.channel.Send("Current Memory Used is : " + std::to_string((virtualMemUsedByMe / (1024 * 1000))) + "MB", bot);
+		
+	}
+	else if (msg.content == "$dm") {
+		msg.author.CreateDM(bot);
+		msg.author.channel.Send("DM Test!", bot);
+	}
+	else if (msg.content == "$smdm") {
+		chan.Send("this was sent from a dm! Sender is: " + msg.author.name, bot);
 	}
 }

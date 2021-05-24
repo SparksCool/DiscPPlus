@@ -47,6 +47,8 @@ namespace DiscPPlus
 		std::string name;
 		std::string mention;
 		std::string id;
+		void CreateDM(Bot bot);
+		Channel channel;
 	};
 	class Message 
 	{

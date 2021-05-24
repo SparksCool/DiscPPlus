@@ -4,7 +4,6 @@
 #include "client.h"
 #include <iostream>
 #include <websocketpp/config/asio_client.hpp>
-#include <websocketpp/client.hpp>
 
 
 #define active true
@@ -20,19 +19,27 @@ typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
 typedef client::connection_ptr connection_ptr;
 
 std::string Token = "";
-std::string url = "wss://gateway.discord.gg/?v=6&encoding=json";
+const std::string url = "wss://gateway.discord.gg/?v=6&encoding=json";
 DiscPPlus::Bot bot;
 nlohmann::json hbAck = nlohmann::json::parse(R"({"op": 1,"d": null})"); // heartbeat
 nlohmann::json ID = nlohmann::json::parse("{\"op\": 2,\"d\": {\"token\":\"\", \"properties\": { \"$os\": \"Windows\", \"$browser\": \"discpp\", \"$device\": \"discpp\"}, \"status\": \"dnd\"}}"); // identify packet
-std::int64_t hbInterval = 41250;
+unsigned short hbInterval = 41250;
 client c;
+bool go = true;
 std::thread sh;
 void sendHeartbeat(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
 
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(hbInterval));
-        c->send(hdl, hbAck.dump(), websocketpp::frame::opcode::text);
-        std::cout << "heartbeat sent" << "\n";
+
+    while (go) {
+        try {
+            std::this_thread::sleep_for(std::chrono::milliseconds(hbInterval));
+            if(go)
+            c->send(hdl, hbAck.dump(), websocketpp::frame::opcode::text);
+            std::cout << "heartbeat sent" << "\n";
+        }
+        catch(...){
+            // do nothing
+        }
     }
 }
 
@@ -43,13 +50,12 @@ void sendHeartbeat(client* c, websocketpp::connection_hdl hdl, message_ptr msg) 
 void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
     bot.SetStats(c, hdl, msg, Token);
     nlohmann::json jsg = nlohmann::json::parse(msg->get_payload()); // getting payload sent to us from discord
-    int opcode = jsg["op"]; // opcode recived from payload
+    short int opcode = jsg["op"]; // opcode recived from payload
     DiscPPlus::Commands Command;
     DiscPPlus::Message message;
     DiscPPlus::Client clint;
-    if (jsg["s"] != NULL) {
-        hbAck["d"] = jsg["s"];
-    }
+    hbAck["d"] = jsg["s"];
+    
 
     std::cout << "on_message called with hdl: " << hdl.lock().get()
         << " and message: " << msg->get_payload()
@@ -68,8 +74,7 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
             std::cout << "payload: " << hbAck.dump() << " was sent" << "\n";
             break;
         case 7 :
-            std::terminate();
-            
+            go = false;        
             clint.establishConnection(Token);
             break;
         case 0 : 
@@ -79,6 +84,7 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
                 message.author.id = jsg["d"]["author"]["id"];
                 message.author.name = jsg["d"]["author"]["username"];
                 message.author.mention = "<@!" + message.author.id + ">";
+                message.author.channel.id = message.author.id;
                 message.embed = false; //jsg["d"][];
 
                 Command.OnMsg(message, bot);
