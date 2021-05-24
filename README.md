@@ -2,7 +2,6 @@
 
 A open source discord API for C++
 
-
 # Requirments 
 Websocket++
 
