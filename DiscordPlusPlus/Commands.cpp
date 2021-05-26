@@ -38,6 +38,14 @@ void DiscPPlus::Author::CreateDM(Bot bot) {
     }
 }
 
+void DiscPPlus::Author::AddRole(std::string role)
+{
+}
+
+void DiscPPlus::Author::RemoveRole(std::string role)
+{
+}
+
 void DiscPPlus::Channel::SendEmbed(DiscPPlus::Embed embed, DiscPPlus::Bot bot) {
     const json payload = embed.payload;
     const std::string channel = id;

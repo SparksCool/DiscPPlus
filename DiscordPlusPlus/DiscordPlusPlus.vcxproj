@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -147,6 +147,7 @@
     <ClInclude Include="client.h" />
     <ClInclude Include="httplib.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="sharding.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="classes.cpp" />
@@ -154,6 +155,8 @@
     <ClCompile Include="commands.cpp" />
     <ClCompile Include="basic-bot-example.cpp" />
     <ClCompile Include="embed.cpp" />
+    <ClCompile Include="message.cpp" />
+    <ClCompile Include="sharding.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

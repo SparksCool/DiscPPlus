@@ -43,45 +43,69 @@ std::string ftime(short int sec) {
 
 }
 
+std::vector<std::string> Args(std::string cmd) {
+	std::stringstream ss(cmd);
+	std::istream_iterator<std::string> begin(ss);
+	std::istream_iterator<std::string> end;
+	std::vector<std::string> vstrings(begin, end);
+	std::copy(vstrings.begin(), vstrings.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+	return vstrings;
+}	
+
 void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { // on message event teliing us that a message has been sent
+	if (msg.content.rfind("$", 0) == 0) {
+		std::vector<std::string> fullcmd = Args(msg.content.substr(1));
+		std::string cmd = fullcmd[0];
+		fullcmd.erase(fullcmd.begin());
+		// all this stuff here should be pretty obvious
+		if (cmd == "hi") {
+			msg.channel.Send("hello! " + msg.author.mention + "! \n https://rb.gy/nnqou3", bot);
+		}
+		else if (cmd == "help") {
+			msg.channel.Send("http://sparktonian.net/Secure/Filesharing/uploads/PrivateStorage/Capture.png", bot);
+		}
+		else if (cmd == "runtime") {
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+			msg.channel.Send("Elapsed Time in HH:MM:SS is: " + ftime(std::chrono::duration_cast<std::chrono::seconds>(end - start).count()), bot);
+		}
+		else if (cmd == "embed") {
+			DiscPPlus::Embed embedmsg;
+			embedmsg.SetAuthor("SparksCool", "", "https://cdn.discordapp.com/attachments/740770560149291089/845730338239938590/detective.png");
+			embedmsg.SetTitle("Whats This?");
+			embedmsg.SetColor(16645526);
+			embedmsg.SetDesc("A Test Description???");
+			embedmsg.AddField("A Field?", "and a value too!");
+			embedmsg.AddField("A Second Field?", "and a second value too!");
+			embedmsg.AddField("A Third Field?", "and a third value too!");
+			embedmsg.SetFooter("Guess what we have a footer aswell!");
+			msg.channel.SendEmbed(embedmsg, bot);
+		}
+		else if (cmd == "ram") {
+			PROCESS_MEMORY_COUNTERS_EX pmc;
+			GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+			const float virtualMemUsedByMe = pmc.PrivateUsage;
+			msg.channel.Send("Current Memory Used is : " + std::to_string((virtualMemUsedByMe / (1024 * 1000))) + "MB", bot);
+
+		}
+		else if (cmd == "dm") {
+			msg.author.CreateDM(bot);
+			msg.author.channel.Send("DM Test!", bot);
+		}
+		else if (cmd == "smdm") {
+			chan.Send("this was sent from a dm! Sender is: " + msg.author.name, bot);
+		}
+		else if (cmd == "cmd") {
+			msg.channel.Send("command is: " + cmd, bot);
+			int c = 0;
+			if (c < fullcmd.size()) {
 
 
-	// all this stuff here should be pretty obvious
-	if (msg.content == "$hi") {
-		msg.channel.Send("hello! "+ msg.author.mention + "! \n https://rb.gy/nnqou3", bot); 
-	}
-	else if (msg.content == "$help") { 
-		msg.channel.Send("http://sparktonian.net/Secure/Filesharing/uploads/PrivateStorage/Capture.png", bot);
-	}
-	else if (msg.content == "$runtime") {
-		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-		
-		msg.channel.Send("Elapsed Time in HH:MM:SS is: " + ftime(std::chrono::duration_cast<std::chrono::seconds>(end - start).count()), bot);
-	}
-	else if (msg.content == "$embed") {
-		DiscPPlus::Embed embedmsg;
-		embedmsg.SetAuthor("SparksCool", "", "https://cdn.discordapp.com/attachments/740770560149291089/845730338239938590/detective.png");
-		embedmsg.SetTitle("Whats This?");
-		embedmsg.SetColor(16645526);
-		embedmsg.SetDesc("A Test Description???");
-		embedmsg.AddField("A Field?", "and a value too!");
-		embedmsg.AddField("A Second Field?", "and a second value too!");
-		embedmsg.AddField("A Third Field?", "and a third value too!");
-		embedmsg.SetFooter("Guess what we have a footer aswell!");
-		msg.channel.SendEmbed(embedmsg, bot);
-	}
-	else if (msg.content=="$ram") {
-		PROCESS_MEMORY_COUNTERS_EX pmc;
-		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-		const float virtualMemUsedByMe = pmc.PrivateUsage;
-		msg.channel.Send("Current Memory Used is : " + std::to_string((virtualMemUsedByMe / (1024 * 1000))) + "MB", bot);
-		
-	}
-	else if (msg.content == "$dm") {
-		msg.author.CreateDM(bot);
-		msg.author.channel.Send("DM Test!", bot);
-	}
-	else if (msg.content == "$smdm") {
-		chan.Send("this was sent from a dm! Sender is: " + msg.author.name, bot);
+				while (c < fullcmd.size()) {
+					msg.channel.Send("Arg[" + std::to_string(c) + "] is " + fullcmd[c], bot);
+					c++;
+				}
+			}
+		}
 	}
 }

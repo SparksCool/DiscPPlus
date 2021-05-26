@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "json.hpp"
+#include "sharding.h"
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 
@@ -33,7 +34,6 @@ namespace DiscPPlus
 		message_ptr msg;
 		websocketpp::connection_hdl hdl;
 		std::string token;
-	public:
 		void SetStats(client* c, websocketpp::connection_hdl hdl, message_ptr msg, std::string token);
 	};
 	class Channel {
@@ -48,6 +48,8 @@ namespace DiscPPlus
 		std::string mention;
 		std::string id;
 		void CreateDM(Bot bot);
+		void AddRole(std::string role);
+		void RemoveRole(std::string role);
 		Channel channel;
 	};
 	class Message 
@@ -62,12 +64,17 @@ namespace DiscPPlus
 	{
 	public:
 		bool establishConnection(std::string token);
+		bool establishShardConnection(std::string token, nlohmann::json ID);
 		void sendWSReq(nlohmann::json payload, std::string wsUrl);
+		void sendShardWSReq(nlohmann::json payload = "", std::string wsUrl = "");
+		std::vector<DiscPPlus::Shard> AddShard(DiscPPlus::Bot bot, int id, int total);
 	};
 	class Commands
 	{
 	public:
 		void OnMsg(Message msg, Bot bot);
 		void OnTyping(Author user, Channel channel);
+		void Ban(std::string authid);
+		void Kick(std::string authid);
 	};
 }
