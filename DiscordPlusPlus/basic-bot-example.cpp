@@ -73,7 +73,7 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 			DiscPPlus::Embed embedmsg;
 			embedmsg.SetAuthor("SparksCool", "", "https://cdn.discordapp.com/attachments/740770560149291089/845730338239938590/detective.png");
 			embedmsg.SetTitle("Whats This?");
-			embedmsg.SetColor(16645526);
+			embedmsg.SetColor(0xFDFD96);
 			embedmsg.SetDesc("A Test Description???");
 			embedmsg.AddField("A Field?", "and a value too!");
 			embedmsg.AddField("A Second Field?", "and a second value too!");
@@ -106,6 +106,9 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 					c++;
 				}
 			}
+		}
+		else if (cmd == "guild") {
+			msg.GetGuild(bot);
 		}
 	}
 }

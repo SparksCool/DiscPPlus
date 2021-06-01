@@ -46,8 +46,71 @@ void DiscPPlus::Author::RemoveRole(std::string role)
 {
 }
 
+bool DiscPPlus::Author::HasPerms(std::string perm)
+{
+    return false;
+}
+
+DiscPPlus::Guild DiscPPlus::Message::GetGuild(DiscPPlus::Bot bot)
+{
+    const std::string path = std::string("/api/v6/guilds/" + guildId);
+
+
+    httplib::Client cli("https://discord.com");
+
+    try
+    {
+        cli.set_default_headers({
+            {"Authorization", "Bot " + bot.token}
+            });
+        auto res = cli.Get(path.c_str());
+        if (res) {
+            std::cout << res->status << '\n';
+            std::cout << res->body << '\n';
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Connection failed, error: " << e.what() << '\n';
+        return Guild();
+    }
+    catch (...) {
+        std::cerr << "UNKNOWN ERROR OCCURED";
+    }
+    return Guild();
+}
+
+
 void DiscPPlus::Channel::SendEmbed(DiscPPlus::Embed embed, DiscPPlus::Bot bot) {
     const json payload = embed.payload;
+    const std::string channel = id;
+    const std::string path = std::string("/api/v6/channels/" + channel + "/messages");
+
+    httplib::Client cli("https://discord.com");
+
+    try
+    {
+        cli.set_default_headers({
+            {"Authorization", "Bot " + bot.token}
+            });
+        std::cout << channel << '\n';
+        auto res = cli.Post(path.c_str(), payload.dump(), "application/json");
+        if (res) {
+            std::cout << res->status << '\n';
+            std::cout << res->body << '\n';
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Connection failed, error: " << e.what() << '\n';
+        return;
+    }
+    catch (...) {
+        std::cerr << "UNKNOWN ERROR OCCURED";
+    }
+}
+
+void DiscPPlus::Channel::SendSpecial(json payload, DiscPPlus::Bot bot) {
     const std::string channel = id;
     const std::string path = std::string("/api/v6/channels/" + channel + "/messages");
 
@@ -76,6 +139,16 @@ void DiscPPlus::Channel::SendEmbed(DiscPPlus::Embed embed, DiscPPlus::Bot bot) {
         std::cerr << "UNKNOWN ERROR OCCURED";
     }
 }
+void DiscPPlus::Channel::GetGuild()
+{
+}
+
+void DiscPPlus::Commands::Ban(std::string authid) {
+
+}
+void DiscPPlus::Commands::Kick(std::string authid) {
+
+}
 
 void DiscPPlus::Channel::Send(std::string msg, DiscPPlus::Bot bot) {
     json payload;
@@ -84,8 +157,6 @@ void DiscPPlus::Channel::Send(std::string msg, DiscPPlus::Bot bot) {
     const std::string channel = id;
     const std::string path = std::string("/api/v6/channels/" + channel + "/messages");
 
-    //, payload.dump(), "application/json"
-//Authorization: Bot ${botToken}
     httplib::Client cli("https://discord.com");
 
     try

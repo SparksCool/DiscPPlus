@@ -78,6 +78,8 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
                 message.author.mention = "<@!" + message.author.id + ">";
                 message.author.channel.id = message.author.id;
                 message.embed = false; //jsg["d"][];
+                message.guildId = jsg["d"]["guild_id"];
+                
 
                 Command.OnMsg(message, bot);
             }
@@ -257,3 +259,4 @@ bool DiscPPlus::Client::establishShardConnection(std::string token, nlohmann::js
     return result;
     std::cout << "loop end" << "\n";
 }
+

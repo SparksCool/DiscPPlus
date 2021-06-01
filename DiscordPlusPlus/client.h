@@ -16,6 +16,7 @@ typedef client::connection_ptr connection_ptr;
 
 namespace DiscPPlus 
 {
+
 	class Embed 
 	{
 	public:
@@ -40,6 +41,8 @@ namespace DiscPPlus
 	public:
 		void Send(std::string msg, DiscPPlus::Bot bot);
 		void SendEmbed(DiscPPlus::Embed, DiscPPlus::Bot bot);
+		void GetGuild();
+		void SendSpecial(nlohmann::json payload, DiscPPlus::Bot bot);
 		std::string id;
 	};
 	class Author {
@@ -50,15 +53,39 @@ namespace DiscPPlus
 		void CreateDM(Bot bot);
 		void AddRole(std::string role);
 		void RemoveRole(std::string role);
+		bool HasPerms(std::string perm);
 		Channel channel;
 	};
-	class Message 
+	class Emoji 
 	{
 	public:
-		std::string content;
-		bool embed;
-		Channel channel;
-		Author author;
+		std::string name;
+		std::string roles;
+		std::string id;
+		bool reqColon;
+		bool managed;
+		bool animated;
+		bool available;
+	};
+	class Role
+	{
+
+	};
+	class Guild
+	{
+	public:
+		std::string name;
+		std::string id;
+		std::string icon;
+		std::string desc;
+		std::string splash;
+		std::string discoverySplash;
+		int memCount;
+		int presenceCount;
+		std::vector<std::string> features;
+		std::vector<Emoji> emojis;
+		std::vector<Role> roles;
+
 	};
 	class Client
 	{
@@ -68,6 +95,16 @@ namespace DiscPPlus
 		void sendWSReq(nlohmann::json payload, std::string wsUrl);
 		void sendShardWSReq(nlohmann::json payload = "", std::string wsUrl = "");
 		std::vector<DiscPPlus::Shard> AddShard(DiscPPlus::Bot bot, int id, int total);
+	};
+	class Message
+	{
+	public:
+		std::string content;
+		bool embed;
+		Channel channel;
+		Author author;
+		Guild GetGuild(DiscPPlus::Bot bot);
+		std::string guildId;
 	};
 	class Commands
 	{
