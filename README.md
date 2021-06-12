@@ -7,6 +7,6 @@ Websocket++
 
 # Credits
 
-Nlohmann (json lib)
+[Nlohmann (json lib)](https://github.com/nlohmann/json)
 
-Yhirose (httplib)
+[Yhirose (httplib)](https://github.com/yhirose/cpp-httplib)
