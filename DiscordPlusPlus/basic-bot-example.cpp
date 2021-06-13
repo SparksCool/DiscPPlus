@@ -4,7 +4,6 @@
 #include <windows.h>
 #include <psapi.h>
 
-
 using DiscPPlus::Commands; // basic commands listed in libs
 using DiscPPlus::Client; // main functions
 
@@ -12,7 +11,7 @@ std::chrono::steady_clock::time_point const start = std::chrono::steady_clock::n
 DiscPPlus::Channel chan;
 
 int main() {
-	chan.id = "844006973732421634";
+	chan.id = "";
 	std::string const token = ""; // our token
 	Client c;
 	c.establishConnection(token); // establish connection using token
@@ -108,7 +107,8 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 			}
 		}
 		else if (cmd == "guild") {
-			msg.GetGuild(bot);
+			DiscPPlus::Guild gld = msg.GetGuild(bot);
+			msg.channel.Send("guild name is:" + gld.name + " with approx " + std::to_string(gld.memCount) + " members" , bot);
 		}
 	}
 }

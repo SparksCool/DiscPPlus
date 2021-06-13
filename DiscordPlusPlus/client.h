@@ -66,6 +66,7 @@ namespace DiscPPlus
 		bool managed;
 		bool animated;
 		bool available;
+		void from_json(nlohmann::json j);
 	};
 	class Role
 	{

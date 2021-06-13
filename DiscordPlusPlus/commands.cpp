@@ -54,20 +54,37 @@ bool DiscPPlus::Author::HasPerms(std::string perm)
 DiscPPlus::Guild DiscPPlus::Message::GetGuild(DiscPPlus::Bot bot)
 {
     const std::string path = std::string("/api/v6/guilds/" + guildId);
-
+    Guild gld;
 
     httplib::Client cli("https://discord.com");
-
+    json msg;
     try
     {
         cli.set_default_headers({
             {"Authorization", "Bot " + bot.token}
             });
-        auto res = cli.Get(path.c_str());
+        auto res = cli.Get((path + "?with_counts=true").c_str());
         if (res) {
+            msg = json::parse(std::string(res->body.c_str()));
             std::cout << res->status << '\n';
-            std::cout << res->body << '\n';
+            std::cout << msg.dump(2) << '\n';
+            gld.name = msg["name"];
+            gld.id = msg["id"];
+            gld.icon = msg["icon"];
+            if (!msg["description"].is_null()) {
+                gld.desc = msg["description"];
+            }
+            if (!msg["splash"].is_null()) {
+                gld.splash = msg["splash"];
+            }
+            if (!msg["discovery_splash"].is_null()) {
+                gld.discoverySplash = msg["discovery_splash"];
+            }
+            gld.memCount = msg["approximate_member_count"];
+            gld.presenceCount = msg["approximate_presence_count"];
+
         }
+        return gld;
     }
     catch (std::exception& e)
     {
@@ -77,7 +94,7 @@ DiscPPlus::Guild DiscPPlus::Message::GetGuild(DiscPPlus::Bot bot)
     catch (...) {
         std::cerr << "UNKNOWN ERROR OCCURED";
     }
-    return Guild();
+    return gld;
 }
 
 
@@ -149,7 +166,9 @@ void DiscPPlus::Commands::Ban(std::string authid) {
 void DiscPPlus::Commands::Kick(std::string authid) {
 
 }
-
+void DiscPPlus::Emoji::from_json(json j)
+{
+}
 void DiscPPlus::Channel::Send(std::string msg, DiscPPlus::Bot bot) {
     json payload;
     payload["content"] = msg;

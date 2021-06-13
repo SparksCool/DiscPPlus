@@ -3,6 +3,7 @@
 #include "json.hpp"
 #include "client.h"
 #include <iostream>
+#include <conio.h>
 #include <websocketpp/config/asio_client.hpp>
 #define active true
 using websocketpp::lib::placeholders::_1;
@@ -41,6 +42,7 @@ void sendHeartbeat(client* c, websocketpp::connection_hdl hdl, message_ptr msg) 
 // prints the message and then sends a copy of the message back to the server.
 void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
     bot.SetStats(c, hdl, msg, Token);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 47);
     nlohmann::json jsg = nlohmann::json::parse(msg->get_payload()); // getting payload sent to us from discord
     short int opcode = jsg["op"]; // opcode recived from payload
     DiscPPlus::Commands Command;
@@ -48,10 +50,12 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
     DiscPPlus::Client clint;
     hbAck["d"] = jsg["s"];
     
-
+   
     std::cout << "on_message called with hdl: " << hdl.lock().get()
-        << " and message: " << msg->get_payload()
+        << " and message: " << jsg.dump(2)
         << std::endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
     // a switch case statement to determine what response we should send back
     // depending on the opcode
     switch (opcode) {
@@ -60,14 +64,17 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
             std::cout << "New Hearbeat Interval is: " << hbInterval << std::endl;
             c->send(hdl, ID.dump(), websocketpp::frame::opcode::text);
             sh = std::thread(sendHeartbeat, c, hdl, msg);
-            std::cout << "payload: " << hbAck.dump() << " and " << ID.dump() <<" was sent" << "\n";
+            std::cout << "payload: " << hbAck.dump(4) << " and " << ID.dump() <<" was sent" << "\n";
             break;
         case 11 :
-            std::cout << "payload: " << hbAck.dump() << " was sent" << "\n";
+            std::cout << "payload: " << hbAck.dump(4) << " was sent" << "\n";
             break;
         case 7 :
-            go = false;        
+            go = false;      
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4);
+            std::cout << "||| RESUMING CONNECTION |||";
             clint.establishConnection(Token);
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
             break;
         case 0 : 
             if (jsg["t"] == "MESSAGE_CREATE") {
@@ -78,7 +85,10 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
                 message.author.mention = "<@!" + message.author.id + ">";
                 message.author.channel.id = message.author.id;
                 message.embed = false; //jsg["d"][];
-                message.guildId = jsg["d"]["guild_id"];
+                if (!jsg["d"]["guild_id"].is_null()) {
+                    message.guildId = jsg["d"]["guild_id"];
+                }
+
                 
 
                 Command.OnMsg(message, bot);
@@ -88,7 +98,6 @@ void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
             break;
     }
 
-    
 
 }
 void on_close(client* c, websocketpp::connection_hdl hdl) {
