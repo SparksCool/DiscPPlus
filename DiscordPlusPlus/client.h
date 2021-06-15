@@ -112,7 +112,7 @@ namespace DiscPPlus
 	public:
 		void OnMsg(Message msg, Bot bot);
 		void OnTyping(Author user, Channel channel);
-		void Ban(std::string authid);
-		void Kick(std::string authid);
+		void Ban(std::string authid, DiscPPlus::Bot bot);
+		void Kick(std::string authid, DiscPPlus::Bot bot, std::string guildid);
 	};
 }

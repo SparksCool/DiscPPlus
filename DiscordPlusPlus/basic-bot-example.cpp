@@ -1,3 +1,4 @@
+
 #include "client.h"
 #include <iostream>
 #include <chrono>
@@ -109,6 +110,16 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 		else if (cmd == "guild") {
 			DiscPPlus::Guild gld = msg.GetGuild(bot);
 			msg.channel.Send("guild name is:" + gld.name + " with approx " + std::to_string(gld.memCount) + " members" , bot);
+		}
+		else if (cmd == "kick") {
+			DiscPPlus::Guild gld = msg.GetGuild(bot);
+			try {
+				Kick(fullcmd[0], bot, gld.id);
+				msg.channel.Send("<@!" + fullcmd[0] + "> has been kicked from" + gld.id + "!", bot);
+			}
+			catch (...) {
+				msg.channel.Send("an error has occured please try again!", bot);
+			}
 		}
 	}
 }

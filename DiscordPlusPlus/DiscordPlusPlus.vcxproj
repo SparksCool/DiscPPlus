@@ -145,6 +145,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="client.h" />
+    <ClInclude Include="commands.h" />
+    <ClInclude Include="discpplus.h" />
     <ClInclude Include="httplib.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="sharding.h" />
