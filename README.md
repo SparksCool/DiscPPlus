@@ -1,6 +1,6 @@
 # DiscPlusPlus
 
-A open source discord API for C++
+A open source 32-bit discord API for C++
 
 # Requirments 
 Websocket++
