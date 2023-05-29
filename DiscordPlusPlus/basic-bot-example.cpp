@@ -62,7 +62,7 @@ void DiscPPlus::Commands::OnMsg(DiscPPlus::Message msg, DiscPPlus::Bot bot) { //
 			msg.channel.Send("hello! " + msg.author.mention + "! \n https://rb.gy/nnqou3", bot);
 		}
 		else if (cmd == "help") {
-			msg.channel.Send("http://sparktonian.net/Secure/Filesharing/uploads/PrivateStorage/Capture.png", bot);
+			msg.channel.Send("", bot);
 		}
 		else if (cmd == "runtime") {
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
